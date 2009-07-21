@@ -98,9 +98,6 @@ class ClicksController < ApplicationController
     start_date = Time.parse params["start_date"]
     end_date = Time.parse params["end_date"]
     @results = Click.find(get_result_ids(start_date, end_date, 300, false) + get_result_ids(start_date, end_date, 100, true))
-
-puts @results.size.to_s
-    
     render :layout => false
   end
 
