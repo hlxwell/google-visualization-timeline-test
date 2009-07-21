@@ -95,21 +95,25 @@ class ClicksController < ApplicationController
 
     # get all id between the duration
     click_ids = Click.find(:all, :select => ['id'], :conditions => ['? < duration and duration < ?', start_date, end_date]).collect(&:id)
-logger.info "-=-=-=-= #{click_ids.size}"
+
     # calculate the factor for MOD calculation
-    if click_ids.size > max_points_to_display
+    if click_ids.size > max_points_to_display and click_ids.size > 0
       mod_factor = (click_ids.size/max_points_to_display).round
     end
 
-logger.info "-=-=-=-=-=-=-=-=  #{start_date.year}-#{start_date.month} -> #{end_date.year}-#{end_date.month}"
-logger.info "-=-=-=-=-=click_ids.size: #{click_ids.size}  max_points_to_display:#{max_points_to_display}   mod_factor: #{mod_factor}"
+logger.info "-=-=-=-=-= #{start_date.year}-#{start_date.month}-#{start_date.day}  --->  #{end_date.year}-#{end_date.month}-#{end_date.day}"
+logger.info "-=-=-=-=-= click_ids.size: #{click_ids.size}  max_points_to_display:#{max_points_to_display}   mod_factor: #{mod_factor}"
 
     # get filtered ids
     final_result_ids = []
-    click_ids.each_with_index do |id,i|
-      if i%mod_factor == 0
-        final_result_ids.push(id)
+    if mod_factor > 1
+      click_ids.each_with_index do |id,i|
+        if i%mod_factor == 0
+           final_result_ids.push(id)
+        end
       end
+    else
+      final_result_ids = click_ids
     end
 
     # get final result
