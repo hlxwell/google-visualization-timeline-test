@@ -89,20 +89,34 @@ class ClicksController < ApplicationController
     end_date = Time.parse params["end_date"]
     start_date = Time.parse params["start_date"]
 
-    days = (end_date - start_date)/(3600*24)
-    max_points_to_display = 1000
+    max_points_to_display = 300
     mod_factor = 0
 
+    # get some point from min date to max date
+    whole_click_ids = Click.find(:all, :select => ['id'], :order => "duration").collect(&:id)
+    if whole_click_ids.size > 100 and whole_click_ids.size > 0
+      whole_mod_factor = (whole_click_ids.size/100).round
+    end
+    
+    whole_final_result_ids = []
+    if whole_mod_factor > 1
+      whole_click_ids.each_with_index do |id,i|
+        if i%whole_mod_factor == 0
+           whole_final_result_ids.push(id)
+        end
+      end
+    else
+      whole_final_result_ids = whole_click_ids
+    end
+    
+    ##############################################
     # get all id between the duration
-    click_ids = Click.find(:all, :select => ['id'], :conditions => ['? < duration and duration < ?', start_date, end_date]).collect(&:id)
+    click_ids = Click.find(:all, :select => ['id'], :conditions => ['? < duration and duration < ?', start_date, end_date], :order => "duration").collect(&:id)
 
     # calculate the factor for MOD calculation
     if click_ids.size > max_points_to_display and click_ids.size > 0
       mod_factor = (click_ids.size/max_points_to_display).round
     end
-
-logger.info "-=-=-=-=-= #{start_date.year}-#{start_date.month}-#{start_date.day}  --->  #{end_date.year}-#{end_date.month}-#{end_date.day}"
-logger.info "-=-=-=-=-= click_ids.size: #{click_ids.size}  max_points_to_display:#{max_points_to_display}   mod_factor: #{mod_factor}"
 
     # get filtered ids
     final_result_ids = []
@@ -117,9 +131,9 @@ logger.info "-=-=-=-=-= click_ids.size: #{click_ids.size}  max_points_to_display
     end
 
     # get final result
-    @results = Click.find final_result_ids
-
-    render :layout => false
+    @results = Click.find(whole_final_result_ids + final_result_ids)
+    
+    render :layout => false #, :text => @results.size
   end
 
 end
