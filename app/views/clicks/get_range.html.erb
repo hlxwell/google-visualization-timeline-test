@@ -6,7 +6,7 @@ var JSONObject = {
   rows: [
           <% @results.each do |result| %>
           {c:[
-            {v: <%= "new Date(#{result.duration.year}, #{result.duration.month} ,#{result.duration.day})" %>},
+            {v: <%= "new Date(#{result.duration.year}, #{result.duration.month-1} ,#{result.duration.day}, #{result.duration.hour}, #{result.duration.min})" %>},
             {v: <%= result.type_id %>}
           ]}
           <%= ',' unless @results.last == result %>

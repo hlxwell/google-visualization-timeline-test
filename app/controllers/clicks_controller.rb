@@ -90,7 +90,7 @@ class ClicksController < ApplicationController
     start_date = Time.parse params["start_date"]
 
     days = (end_date - start_date)/(3600*24)
-    max_points_to_display = 500
+    max_points_to_display = 1000
     mod_factor = 0
 
     # get all id between the duration

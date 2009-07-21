@@ -32,13 +32,13 @@
     var previousRange = 0;
 
     function drawChart() {
-      $.get("/clicks/get_range", { start_date : new Date(2009,1,1), end_date : new Date(2009,12,1) },
+      $.get("/clicks/get_range", { start_date : new Date(2008,1,1), end_date : new Date(2009,12,1) },
         function(data){
           eval(data);
           data = new google.visualization.DataTable(JSONObject);
           chart = new google.visualization.AnnotatedTimeLine($('#chart_div')[0]);
-          chart.draw(data, {displayAnnotations: true});
-          //bind events
+          chart.draw(data, {displayAnnotations: true, zoomStartTime: new Date(2008,12,1), zoomEndTime: new Date(2009,12,1)});
+          // bind events
           google.visualization.events.addListener(chart, 'rangechange', rangechanged);
         }
       );
@@ -49,8 +49,7 @@
         function(data){
           eval(data);
           data = new google.visualization.DataTable(JSONObject);
-          chart.draw(data, {displayAnnotations: true});
-          // chart.setVisibleChartRange(event.start, event.end);
+          chart.draw(data, { displayAnnotations: true, zoomStartTime: event.start, zoomEndTime: event.end });
         }
       );
     }
