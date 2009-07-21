@@ -1,0 +1,9 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  duration: 2009-07-21 00:12:06
+  type_id: 1
+
+two:
+  duration: 2009-07-21 00:12:06
+  type_id: 1

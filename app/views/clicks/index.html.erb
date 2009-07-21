@@ -1,0 +1,88 @@
+<h1>Listing clicks</h1>
+
+<table>
+  <tr>
+    <th>Duration</th>
+    <th>Type</th>
+  </tr>
+
+<% @clicks.each do |clicks| %>
+  <tr>
+    <td><%=h clicks.duration %></td>
+    <td><%=h clicks.type_id %></td>
+    <td><%= link_to 'Show', clicks %></td>
+    <td><%= link_to 'Edit', edit_click_path(clicks) %></td>
+    <td><%= link_to 'Destroy', clicks, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New clicks', new_click_path %>
+
+<br>
+
+<% content_for :head_include do -%>
+  <script type='text/javascript' src='http://www.google.com/jsapi'></script>
+  <script type='text/javascript'>
+    google.load('visualization', '1', {'packages':['annotatedtimeline'], 'language':'zh_CN', 'displayZoomButtons':'true'});
+    google.setOnLoadCallback(drawChart);
+
+    var chart = 0;
+    var data = 0;
+    var previousRange = 0;
+
+    function drawChart() {
+      var JSONObject = {
+        cols: [
+                {id: 'date', label: 'Date', type: 'date'},
+                {id: 'hours', label: 'Hours per Day', type: 'number'}
+              ],
+        rows: [
+                {c:[
+                  {v: new Date(2009, 6 ,5)},
+                  {v: 11}
+                ]},
+                {c:[
+                  {v: new Date(2009, 7 ,4)},
+                  {v: 4}
+                ]},
+                {c:[
+                  {v: new Date(2009, 8 ,3)},
+                  {v: 2}
+                ]},
+                {c:[
+                  {v: new Date(2009, 9 ,3)},
+                  {v: 2}
+                ]}
+              ]
+      };
+      data = new google.visualization.DataTable(JSONObject);
+      chart = new google.visualization.AnnotatedTimeLine($('#chart_div')[0]);
+      chart.draw(data, {displayAnnotations: true});
+      
+      bindEvent();
+    }
+
+    //bind events
+    function bindEvent() {
+      google.visualization.events.addListener(chart, 'rangechange', rangechanged);
+    }
+
+    function rangechanged(event) {
+      $.get("/clicks/get_range", { end_date : event.end, start_date : event.start },
+        function(data){
+          eval("var JSONObject = " + data);
+          
+          alert(JSONObject);
+          data = new google.visualization.DataTable(JSONObject);
+          chart.draw(data, {displayAnnotations: true});
+          chart.setVisibleChartRange(event.start, event.end);
+        }
+      );
+    }
+  </script>
+<% end -%>
+<a href="#" onclick='bindData()'>test</a>
+<div id='chart_div' style='width: 700px; height: 240px;'></div>
