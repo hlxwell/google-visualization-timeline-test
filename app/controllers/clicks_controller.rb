@@ -2,7 +2,7 @@ class ClicksController < ApplicationController
   # GET /clicks
   # GET /clicks.xml
   def index
-    @clicks = Click.all
+    @clicks = [] #Click.all
 
     respond_to do |format|
       format.html # index.html.erb
@@ -86,28 +86,28 @@ class ClicksController < ApplicationController
 
   def get_range
     require 'time'
-    # end_date = Time.parse params["end_date"]
-    # start_date = Time.parse params["start_date"]
-
-    end_date = Time.now
-    start_date = 1.month.ago
+    end_date = Time.parse params["end_date"]
+    start_date = Time.parse params["start_date"]
 
     days = (end_date - start_date)/(3600*24)
-    max_points_to_display = 5
+    max_points_to_display = 500
     mod_factor = 0
 
     # get all id between the duration
-    click_ids = Click.find(:all, :select => ['id'], :conditions => ['created_at > ? and created_at < ?', start_date, end_date]).collect(&:id)
-
+    click_ids = Click.find(:all, :select => ['id'], :conditions => ['? < duration and duration < ?', start_date, end_date]).collect(&:id)
+logger.info "-=-=-=-= #{click_ids.size}"
     # calculate the factor for MOD calculation
     if click_ids.size > max_points_to_display
-      mod_factor = (click_ids.size/max_points_to_display).floor
+      mod_factor = (click_ids.size/max_points_to_display).round
     end
+
+logger.info "-=-=-=-=-=-=-=-=  #{start_date.year}-#{start_date.month} -> #{end_date.year}-#{end_date.month}"
+logger.info "-=-=-=-=-=click_ids.size: #{click_ids.size}  max_points_to_display:#{max_points_to_display}   mod_factor: #{mod_factor}"
 
     # get filtered ids
     final_result_ids = []
     click_ids.each_with_index do |id,i|
-      if i%mod_factor == 1
+      if i%mod_factor == 0
         final_result_ids.push(id)
       end
     end

@@ -16,12 +16,10 @@
   </tr>
 <% end %>
 </table>
-
 <br />
-
-<%= link_to 'New clicks', new_click_path %>
-
+<%#= link_to 'New clicks', new_click_path %>
 <br>
+
 
 <% content_for :head_include do -%>
   <script type='text/javascript' src='http://www.google.com/jsapi'></script>
@@ -34,7 +32,7 @@
     var previousRange = 0;
 
     function drawChart() {
-      $.get("/clicks/get_range", { end_date : new Date(2009,12,1), start_date : new Date(2009,1,1) },
+      $.get("/clicks/get_range", { start_date : new Date(2009,1,1), end_date : new Date(2009,12,1) },
         function(data){
           eval(data);
           data = new google.visualization.DataTable(JSONObject);
