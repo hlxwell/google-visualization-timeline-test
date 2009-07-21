@@ -34,48 +34,22 @@
     var previousRange = 0;
 
     function drawChart() {
-      var JSONObject = {
-        cols: [
-                {id: 'date', label: 'Date', type: 'date'},
-                {id: 'hours', label: 'Hours per Day', type: 'number'}
-              ],
-        rows: [
-                {c:[
-                  {v: new Date(2009, 6 ,5)},
-                  {v: 11}
-                ]},
-                {c:[
-                  {v: new Date(2009, 7 ,4)},
-                  {v: 4}
-                ]},
-                {c:[
-                  {v: new Date(2009, 8 ,3)},
-                  {v: 2}
-                ]},
-                {c:[
-                  {v: new Date(2009, 9 ,3)},
-                  {v: 2}
-                ]}
-              ]
-      };
-      data = new google.visualization.DataTable(JSONObject);
-      chart = new google.visualization.AnnotatedTimeLine($('#chart_div')[0]);
-      chart.draw(data, {displayAnnotations: true});
-      
-      bindEvent();
-    }
-
-    //bind events
-    function bindEvent() {
-      google.visualization.events.addListener(chart, 'rangechange', rangechanged);
+      $.get("/clicks/get_range", { end_date : new Date(2009,12,1), start_date : new Date(2009,1,1) },
+        function(data){
+          eval(data);
+          data = new google.visualization.DataTable(JSONObject);
+          chart = new google.visualization.AnnotatedTimeLine($('#chart_div')[0]);
+          chart.draw(data, {displayAnnotations: true});
+          //bind events
+          google.visualization.events.addListener(chart, 'rangechange', rangechanged);
+        }
+      );
     }
 
     function rangechanged(event) {
       $.get("/clicks/get_range", { end_date : event.end, start_date : event.start },
         function(data){
-          eval("var JSONObject = " + data);
-          
-          alert(JSONObject);
+          eval(data);
           data = new google.visualization.DataTable(JSONObject);
           chart.draw(data, {displayAnnotations: true});
           chart.setVisibleChartRange(event.start, event.end);
@@ -84,5 +58,4 @@
     }
   </script>
 <% end -%>
-<a href="#" onclick='bindData()'>test</a>
 <div id='chart_div' style='width: 700px; height: 240px;'></div>

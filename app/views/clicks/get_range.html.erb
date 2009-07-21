@@ -1,0 +1,15 @@
+var JSONObject = {
+  cols: [
+          {id: 'date', label: 'Date', type: 'date'},
+          {id: 'hours', label: 'Hours per Day', type: 'number'}
+        ],
+  rows: [
+          <% @results.each do |result| %>
+          {c:[
+            {v: <%= "new Date(#{result.duration.year}, #{result.duration.month} ,#{result.duration.day})" %>},
+            {v: <%= result.type_id %>}
+          ]}
+          <%= ',' unless @results.last == result %>
+          <% end %>
+        ]
+};

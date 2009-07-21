@@ -85,56 +85,37 @@ class ClicksController < ApplicationController
   end
 
   def get_range
-    # require 'time'
+    require 'time'
     # end_date = Time.parse params["end_date"]
     # start_date = Time.parse params["start_date"]
-    # days = (end_date - start_date)/(3600*24)
-    # max_points_to_display = 3
-    # mod_factor = 0
-    # 
-    # # get all id between the duration
-    # click_ids = Click.find(:all, :select => ['id'], :conditions => ['created_at > ? and created_at < ?', start_date, end_date]).collect(&:id)
-    # 
-    # # calculate the factor for MOD calculation
-    # if click_ids.size > max_points_to_display
-    #   mod_factor = (click_ids.size/max_points_to_display).floor
-    # end
-    # 
-    # # get filtered ids
-    # final_result_ids = []
-    # click_ids.each_with_index do |id,i| 
-    #   if i%mod_factor == 1
-    #     final_result_ids.push(id)
-    #   end
-    # end
-    # 
-    # # get final result
-    # result = Click.find final_result_ids
-    result.to_json(:only => [:id, :type_id])
-    
-    s = {
-      'cols' => [
-              {
-                'id' => 'date', 
-                'label' => 'Date', 
-                'type' => 'date'
-              },
-              {
-                'id' => 'duration', 
-                'label' => 'executing duration', 
-                'type' => 'number'
-              }
-            ],
-      'rows' => [
-              {'c' => [
-                {'v' => Time.now},
-                {'v' => 11}
-              ]}
-            ]
-    }.to_json;
-    
-    
-    render :text => s
+
+    end_date = Time.now
+    start_date = 1.month.ago
+
+    days = (end_date - start_date)/(3600*24)
+    max_points_to_display = 5
+    mod_factor = 0
+
+    # get all id between the duration
+    click_ids = Click.find(:all, :select => ['id'], :conditions => ['created_at > ? and created_at < ?', start_date, end_date]).collect(&:id)
+
+    # calculate the factor for MOD calculation
+    if click_ids.size > max_points_to_display
+      mod_factor = (click_ids.size/max_points_to_display).floor
+    end
+
+    # get filtered ids
+    final_result_ids = []
+    click_ids.each_with_index do |id,i|
+      if i%mod_factor == 1
+        final_result_ids.push(id)
+      end
+    end
+
+    # get final result
+    @results = Click.find final_result_ids
+
+    render :layout => false
   end
 
 end
