@@ -1,43 +1,22 @@
-<h1>Listing clicks</h1>
-
-<table>
-  <tr>
-    <th>Duration</th>
-    <th>Type</th>
-  </tr>
-
-<% @clicks.each do |clicks| %>
-  <tr>
-    <td><%=h clicks.duration %></td>
-    <td><%=h clicks.type_id %></td>
-    <td><%= link_to 'Show', clicks %></td>
-    <td><%= link_to 'Edit', edit_click_path(clicks) %></td>
-    <td><%= link_to 'Destroy', clicks, :confirm => 'Are you sure?', :method => :delete %></td>
-  </tr>
-<% end %>
-</table>
-<br />
-<%#= link_to 'New clicks', new_click_path %>
-<br>
-
-
 <% content_for :head_include do -%>
   <script type='text/javascript' src='http://www.google.com/jsapi'></script>
   <script type='text/javascript'>
     google.load('visualization', '1', {'packages':['annotatedtimeline'], 'language':'zh_CN', 'displayZoomButtons':'true'});
     google.setOnLoadCallback(drawChart);
 
-    var chart = 0;
-    var data = 0;
-    var previousRange = 0;
-
+    var chart          = 0;
+    var data           = 0;
+    var previousRange  = 0;
+    var dateline_start = <%= @dateline_start %>;
+    var dateline_end   = <%= @dateline_end %>;
+    
     function drawChart() {
-      $.get("/clicks/get_range", { start_date : new Date(2008,1,1), end_date : new Date(2009,12,1) },
+      $.get("/clicks/get_range", { start_date : dateline_start, end_date : dateline_end },
         function(data){
           eval(data);
           data = new google.visualization.DataTable(JSONObject);
           chart = new google.visualization.AnnotatedTimeLine($('#chart_div')[0]);
-          chart.draw(data, {displayAnnotations: true, zoomStartTime: new Date(2008,12,1), zoomEndTime: new Date(2009,12,1)});
+          chart.draw(data, {displayAnnotations: true, zoomStartTime: dateline_start, zoomEndTime: dateline_end});
           // bind events
           google.visualization.events.addListener(chart, 'rangechange', rangechanged);
         }

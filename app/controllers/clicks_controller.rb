@@ -2,7 +2,16 @@ class ClicksController < ApplicationController
   # GET /clicks
   # GET /clicks.xml
   def index
-    @clicks = [] #Click.all
+    max_date = Click.maximum('duration')
+    min_date = Click.minimum('duration')
+
+    ###
+    # This is a very important things we got to take attention.
+    # new Date(year, month, day) # month is from 0 - 11
+    @dateline_start = "new Date(#{min_date.year},#{min_date.month - 1},#{min_date.day})"
+    @dateline_end = "new Date(#{max_date.year},#{max_date.month - 1},#{max_date.day})"
+
+    # @clicks = [] Click.all
 
     respond_to do |format|
       format.html # index.html.erb
@@ -86,33 +95,27 @@ class ClicksController < ApplicationController
 
   def get_range
     require 'time'
-    end_date = Time.parse params["end_date"]
     start_date = Time.parse params["start_date"]
+    end_date = Time.parse params["end_date"]
+    @results = Click.find(get_result_ids(start_date, end_date, 300, false) + get_result_ids(start_date, end_date, 100, true))
 
-    max_points_to_display = 300
+puts @results.size.to_s
+    
+    render :layout => false
+  end
+
+  private
+  def get_result_ids(start_date, end_date, max_points_to_display = 300, is_load_outside_points = false)
     mod_factor = 0
 
-    # get some point from min date to max date
-    whole_click_ids = Click.find(:all, :select => ['id'], :order => "duration").collect(&:id)
-    if whole_click_ids.size > 100 and whole_click_ids.size > 0
-      whole_mod_factor = (whole_click_ids.size/100).round
-    end
-    
-    whole_final_result_ids = []
-    if whole_mod_factor > 1
-      whole_click_ids.each_with_index do |id,i|
-        if i%whole_mod_factor == 0
-           whole_final_result_ids.push(id)
-        end
-      end
+    if is_load_outside_points
+      # get some points out of the range between start and end date. 
+      click_ids = Click.find(:all, :select => ['id'], :conditions => ['? > duration or duration > ?',  start_date, end_date], :order => "duration").collect(&:id)
     else
-      whole_final_result_ids = whole_click_ids
+      # get all ids inside the range
+      click_ids = Click.find(:all, :select => ['id'], :conditions => ['? < duration and duration < ?', start_date, end_date], :order => "duration").collect(&:id)
     end
     
-    ##############################################
-    # get all id between the duration
-    click_ids = Click.find(:all, :select => ['id'], :conditions => ['? < duration and duration < ?', start_date, end_date], :order => "duration").collect(&:id)
-
     # calculate the factor for MOD calculation
     if click_ids.size > max_points_to_display and click_ids.size > 0
       mod_factor = (click_ids.size/max_points_to_display).round
@@ -130,10 +133,6 @@ class ClicksController < ApplicationController
       final_result_ids = click_ids
     end
 
-    # get final result
-    @results = Click.find(whole_final_result_ids + final_result_ids)
-    
-    render :layout => false #, :text => @results.size
+    final_result_ids
   end
-
 end
