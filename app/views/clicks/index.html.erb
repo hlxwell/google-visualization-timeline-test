@@ -1,7 +1,7 @@
 <% content_for :head_include do -%>
   <script type='text/javascript' src='http://www.google.com/jsapi'></script>
   <script type='text/javascript'>
-    google.load('visualization', '1', {'packages':['annotatedtimeline'], 'language':'zh_CN', 'displayZoomButtons':'true'});
+    google.load('visualization', '1', {'packages':['annotatedtimeline'], 'displayZoomButtons':'true'});
     google.setOnLoadCallback(drawChart);
 
     var chart          = 0;
@@ -25,10 +25,16 @@
 
     function rangechanged(event) {
       $.get("/clicks/get_range", { end_date : event.end, start_date : event.start },
-        function(data){
+        function(data){          
           eval(data);
           data = new google.visualization.DataTable(JSONObject);
-          chart.draw(data, { displayAnnotations: true, zoomStartTime: event.start, zoomEndTime: event.end });
+          // for event.start is CST time, but when you draw the chart,
+          // google will translate the time into UTC.
+          var st = event.start;
+          var ed = event.end;
+          st.setTime(st.getTime() + 8*3600*1000);
+          ed.setTime(ed.getTime() + 8*3600*1000);
+          chart.draw(data, { displayAnnotations: true, zoomStartTime: st , zoomEndTime: ed });
         }
       );
     }
