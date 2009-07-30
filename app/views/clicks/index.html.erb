@@ -32,8 +32,8 @@
           // google will translate the time into UTC.
           var st = event.start;
           var ed = event.end;
-          st.setTime(st.getTime() + 8*3600*1000);
-          ed.setTime(ed.getTime() + 8*3600*1000);
+          st.setHours(st.getHours() + 8);
+          ed.setHours(ed.getHours() + 8);
           chart.draw(data, { displayAnnotations: true, zoomStartTime: st , zoomEndTime: ed });
         }
       );
